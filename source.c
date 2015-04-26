@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <sys/time.h>
 
 // These definitions now handled by Makefile
 // #define N 1024
-// #define TRIALS 3
+// #define DENSE 1
+// #define BLOCKING 0
 
 double getTime();
 int allocMatrix(int***);
@@ -12,6 +14,8 @@ int populateSimpleMatrix(int**, int);
 int printMatrix(int**);
 int printAll(int**, int**, int**);
 int denseMult(int**, int**, int**);
+int blockMult(int**, int**, int**);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // main
@@ -19,25 +23,33 @@ int main() {
 	double startTime, endTime, avgTime = 0;
 
 	// Declare and allocate memory for the matrices
-	int **op1, **op2, **result;
+	int **op1, **op2, **result, **result2;
 	allocMatrix(&op1);
 	allocMatrix(&op2);
 	allocMatrix(&result);
+	allocMatrix(&result2);
 
-	// Run the multiplication TRIALS times and average the runtime results
-	for(int i=0; i<TRIALS; i++) {
-		// Jam some numbers into the operands
-		populateSimpleMatrix(op1, i);
-		populateSimpleMatrix(op2, i+2);
+	// Jam some numbers into the operands
+	populateSimpleMatrix(op1, 0);
+	populateSimpleMatrix(op2, 2);
 
+	if (DENSE != 0) {
 		startTime = getTime();
 		denseMult(op1, op2, result);
-		avgTime += getTime() - startTime;
-	}
-	if (N < 16) printAll(op1, op2, result);  // Print small matrices only
 
-	avgTime /= TRIALS;
-	printf("N = %d, Average Dense Multiplication Runtime = %fs\n\n", N, avgTime);
+		if (N < 16) printAll(op1, op2, result);  // Print small matrices only
+		printf("Dense Multiplication Runtime = %fs\n", getTime() - startTime);
+	}
+
+	if (BLOCKING != 0) {
+		startTime = getTime();
+		blockMult(op1, op2, result);
+
+		if (N < 16) printAll(op1, op2, result);  // Print small matrices only
+		printf("Block Multiplication Runtime = %fs\n\n", getTime() - startTime);
+	}
+	else 
+		printf("\n");
 
 	return 0;
 }
@@ -117,6 +129,7 @@ int printAll(int **op1, int **op2, int **result) {
 // Multiplies op1 by op2 and stores the result in result
 int denseMult(int **op1, int **op2, int **result) {
 	int element;
+
 	for(int i=0; i<N; i++)
 		for(int j=0; j<N; j++) {
 			element = 0;
@@ -124,6 +137,27 @@ int denseMult(int **op1, int **op2, int **result) {
 				element += op1[i][k] * op2[k][j];
 			}
 			result[i][j] = element;
+		}
+
+	return 1;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// FUNCTION blockMult
+// Uses block method to multiply op1 by op2 and stores the result in result
+int blockMult(int **op1, int **op2, int **result) {
+	int element;
+
+	for(int jj=0; jj<N; jj+=BLOCKING)
+		for(int kk=0; kk<N; kk+=BLOCKING) {
+			for(int i=0; i<N; i++)
+				for(int j=jj; j<fmin(jj+BLOCKING,N); j++) {
+					element = 0;
+					for(int k=kk; k<fmin(kk+BLOCKING,N);k++)
+						element += op1[i][k]*op2[k][j];
+					result[i][j] = element;
+				}
 		}
 
 	return 1;
