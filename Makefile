@@ -12,7 +12,7 @@ part23: source.c
 
 part4: source.c
 	@for b in 4 8 16 32 64 128 256 512; do\
-		gcc source.c -std=c99 -O3 -DN=2048 -DDENSE=1 -DBLOCKING=$$b -o P2;\
+		gcc source.c -std=c99 -O3 -DN=2048 -DDENSE=0 -DBLOCKING=$$b -o P2;\
 		./P2; \
 	done;
 
