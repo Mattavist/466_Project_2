@@ -32,6 +32,7 @@ int main() {
 	// Jam some numbers into the operands
 	populateSimpleMatrix(op1, 0);
 	populateSimpleMatrix(op2, 2);
+	printf("N = %d, Blocking Factor = %d\n", N, BLOCKING);
 
 	if (DENSE != 0) {
 		startTime = getTime();
