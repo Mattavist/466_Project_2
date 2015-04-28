@@ -20,14 +20,13 @@ int blockMult(int**, int**, int**);
 ///////////////////////////////////////////////////////////////////////////////
 // main
 int main() {
-	double startTime, endTime, avgTime = 0;
+	double startTime;
 
 	// Declare and allocate memory for the matrices
-	int **op1, **op2, **result, **result2;
+	int **op1, **op2, **result;
 	allocMatrix(&op1);
 	allocMatrix(&op2);
 	allocMatrix(&result);
-	allocMatrix(&result2);
 
 	// Jam some numbers into the operands
 	populateSimpleMatrix(op1, 0);
@@ -73,7 +72,7 @@ double getTime() {
 // FUNCTION allocMatrix
 // Allocates memory for an NxN matrix
 int allocMatrix(int ***matrix) {	
-	*matrix = malloc(sizeof(int)*N);
+	*matrix = malloc(sizeof(int*)*N);
 	for(int i=0; i<N; i++)
 		(*matrix)[i] = malloc(sizeof(int)*N);
 
